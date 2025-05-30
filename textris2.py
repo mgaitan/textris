@@ -225,7 +225,7 @@ class NextPieceWidget(Static):
         # top border
         text.append("┌" + "─" * (dim*2) + "┐\n", style="dim white")
 
-        # how many blank rows above/below
+        # how many qnk rows above/below
         top_pad    = (dim - shape_h) // 2
         bottom_pad = dim - shape_h - top_pad
 
@@ -319,8 +319,7 @@ class TetrisApp(App):
     }
 
     #board-container {
-        width: 24;
-        height: 24;
+        width: 30;
         margin: 1;
         padding: 1;
         background: $panel;
@@ -329,6 +328,7 @@ class TetrisApp(App):
 
     #board-display {
         margin: 1;
+        padding: 1;
     }
 
     #sidebar {
