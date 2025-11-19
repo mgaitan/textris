@@ -136,6 +136,9 @@ class TetrisBoard(Static):
         if self.check_collision():
             # Revert move
             self.current_piece.x, self.current_piece.y = old_x, old_y
+            # If we were moving down, lock the piece in place
+            if dy > 0:
+                self.lock_piece()
             return False
 
         self.update_display()
@@ -155,6 +158,17 @@ class TetrisBoard(Static):
                 return True
 
         return False
+
+    def lock_piece(self):
+        """Fix the current piece to the board and spawn a new one."""
+        for board_x, board_y in self.current_piece.blocks:
+            if (0 <= board_x < self.board_width and
+                0 <= board_y < self.board_height):
+                self.board[board_y][board_x] = self.current_piece.color
+
+        # Spawn a new piece
+        self.current_piece = TetrisPiece()
+        self.update_display()
 
     def rotate_piece(self):
         """Rotate the current piece"""
@@ -399,13 +413,8 @@ class TetrisApp(App):
 
     def auto_drop(self):
         """Automatically drop the current piece"""
-        if not self.board.move_piece(0, 1):
-            # Piece can't move down anymore - this is where we'd lock it and spawn new piece
-            # For now, just reset to top
-            self.board.current_piece.x = 4
-            self.board.current_piece.y = 0
-            self.board.current_piece = TetrisPiece()
-            self.board.update_display()
+        # move_piece will lock the piece if it can't go lower
+        self.board.move_piece(0, 1)
 
     def action_move_left(self):
         """Move piece left"""
