@@ -5,6 +5,9 @@
 # ]
 # ///
 
+import os
+import sys
+
 from textual.app import App, ComposeResult
 from textual.widgets import Static, Label
 from textual.containers import Container, Horizontal, Vertical
@@ -354,6 +357,7 @@ class TetrisApp(App):
     }
 
     #score-container {
+        height: 9;
         padding: 1;
         background: $panel;
         border: solid $accent;
@@ -559,28 +563,11 @@ class TetrisApp(App):
         self.game_over_overlay.display = True
 
     def action_restart(self):
-        """Reset the game state and start anew."""
-        # Reset stats and speed
-        self.score = 0
-        self.level = 1
-        self.lines_cleared = 0
-        self.drop_interval = 1.0
-        self.game_over = False
-
-        # Reset board contents and queued pieces
-        self.board.board = [[0 for _ in range(self.board.board_width)] for _ in range(self.board.board_height)]
-        self.next_piece = TetrisPiece()
-        self.board.current_piece = self.next_piece
-
-        # Hide game over overlay
-        self.board_container.remove_class("game-over")
-        self.game_over_overlay.display = False
-
-        # Refresh UI and restart timer
-        self.board.update_display()
-        self._queue_new_piece()
-        self._refresh_score_widget()
-        self.start_game_timer()
+        """Restart the whole process when game over."""
+        if not self.game_over:
+            return
+        # Relaunch the current Python process with same args for a clean state.
+        os.execl(sys.executable, sys.executable, *sys.argv)
 
 if __name__ == "__main__":
     app = TetrisApp()
