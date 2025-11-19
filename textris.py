@@ -412,7 +412,8 @@ class TetrisApp(App):
         ("space", "hard_drop", "Drop"),
         ("ctrl+q", "quit", "Quit"),
         ("r", "restart", "Restart"),
-    ]
+        ("ctrl+s", "screenshot", "Screenshot"),
+    )
 
     def compose(self) -> ComposeResult:
         with Container(id="game-container"):
