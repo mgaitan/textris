@@ -5,26 +5,27 @@
 # ]
 # ///
 
+import contextlib
 import os
+import random
 import sys
 
-from textual.app import App, ComposeResult
-from textual.widgets import Static, Label
-from textual.containers import Container, Horizontal, Vertical
-from textual.reactive import reactive
 from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.containers import Container, Horizontal, Vertical
 from textual.css.query import NoMatches
-import random
+from textual.reactive import reactive
+from textual.widgets import Label, Static
 
 # Compact hex-based shape definitions (4x4 grid, see README snippet)
 PIECES = {
-    'O': {'color': 'yellow',        'codes': ['56a9', '6a95', 'a956', '956a']},
-    'I': {'color': 'cyan',          'codes': ['4567', '26ae', 'ba98', 'd951']},
-    'J': {'color': 'blue',          'codes': ['0456', '2159', 'a654', '8951']},
-    'L': {'color': 'bright_yellow', 'codes': ['2654', 'a951', '8456', '0159']},
-    'T': {'color': 'magenta',       'codes': ['1456', '6159', '9654', '4951']},
-    'Z': {'color': 'red',           'codes': ['0156', '2659', 'a954', '8451']},
-    'S': {'color': 'green',         'codes': ['1254', 'a651', '8956', '0459']},
+    "O": {"color": "yellow", "codes": ["56a9", "6a95", "a956", "956a"]},
+    "I": {"color": "cyan", "codes": ["4567", "26ae", "ba98", "d951"]},
+    "J": {"color": "blue", "codes": ["0456", "2159", "a654", "8951"]},
+    "L": {"color": "bright_yellow", "codes": ["2654", "a951", "8456", "0159"]},
+    "T": {"color": "magenta", "codes": ["1456", "6159", "9654", "4951"]},
+    "Z": {"color": "red", "codes": ["0156", "2659", "a954", "8451"]},
+    "S": {"color": "green", "codes": ["1254", "a651", "8956", "0459"]},
 }
 
 
@@ -49,14 +50,15 @@ def coords_to_matrix(coords):
         matrix[y][x] = 1
     return matrix
 
+
 class TetrisPiece:
     def __init__(self, piece_type=None):
         if piece_type is None:
             piece_type = random.choice(list(PIECES.keys()))
 
         self.type = piece_type
-        self.color = PIECES[piece_type]['color']
-        self.codes = PIECES[piece_type]['codes']
+        self.color = PIECES[piece_type]["color"]
+        self.codes = PIECES[piece_type]["codes"]
         self.rotation = 0
         self.x = 4  # Start at center of board
         self.y = 0
@@ -72,6 +74,7 @@ class TetrisPiece:
 
     def rotate(self):
         self.rotation = (self.rotation + 1) % len(self.codes)
+
 
 class TetrisBoard(Static):
     """The main game board widget"""
@@ -100,8 +103,7 @@ class TetrisBoard(Static):
         # Add current piece to display board
         if self.current_piece:
             for board_x, board_y in self.current_piece.blocks:
-                if (0 <= board_x < self.board_width and
-                    0 <= board_y < self.board_height):
+                if 0 <= board_x < self.board_width and 0 <= board_y < self.board_height:
                     display_board[board_y][board_x] = self.current_piece.color
 
         # Add top border
@@ -127,7 +129,6 @@ class TetrisBoard(Static):
         board_display = self.query_one("#board-display", Static)
         board_display.update(self.render_board())
 
-
     def move_piece(self, dx, dy):
         """Move the current piece"""
         old_x, old_y = self.current_piece.x, self.current_piece.y
@@ -149,10 +150,8 @@ class TetrisBoard(Static):
     def check_collision(self):
         """Check if current piece collides with boundaries or other pieces"""
         for board_x, board_y in self.current_piece.blocks:
-
             # Check boundaries
-            if (board_x < 0 or board_x >= self.board_width or
-                board_y >= self.board_height):
+            if board_x < 0 or board_x >= self.board_width or board_y >= self.board_height:
                 return True
 
             # Check collision with existing pieces (if board_y >= 0)
@@ -164,8 +163,7 @@ class TetrisBoard(Static):
     def lock_piece(self):
         """Fix the current piece to the board and spawn a new one."""
         for board_x, board_y in self.current_piece.blocks:
-            if (0 <= board_x < self.board_width and
-                0 <= board_y < self.board_height):
+            if 0 <= board_x < self.board_width and 0 <= board_y < self.board_height:
                 self.board[board_y][board_x] = self.current_piece.color
 
         # Clear any completed lines
@@ -203,6 +201,7 @@ class TetrisBoard(Static):
         self.update_display()
         return True
 
+
 class NextPieceWidget(Static):
     """Widget to show the next piece"""
 
@@ -219,14 +218,14 @@ class NextPieceWidget(Static):
         color = self.next_piece.color
         shape_h = len(shape_matrix)
         shape_w = max(len(r) for r in shape_matrix)
-        dim     = max(shape_h, shape_w, 4)
+        dim = max(shape_h, shape_w, 4)
 
         text = Text()
         # top border
-        text.append("┌" + "─" * (dim*2) + "┐\n", style="dim white")
+        text.append("┌" + "─" * (dim * 2) + "┐\n", style="dim white")
 
         # how many qnk rows above/below
-        top_pad    = (dim - shape_h) // 2
+        top_pad = (dim - shape_h) // 2
         bottom_pad = dim - shape_h - top_pad
 
         # helper for an empty row
@@ -238,8 +237,8 @@ class NextPieceWidget(Static):
         # each shape row, centered horizontally
         for row in shape_matrix:
             # left padding
-            left   = (dim - len(row)) // 2
-            right  = dim - len(row) - left
+            left = (dim - len(row)) // 2
+            right = dim - len(row) - left
             text.append("│", style="dim white")
             text.append("  " * left)
             for cell in row:
@@ -256,15 +255,15 @@ class NextPieceWidget(Static):
             text.append("│\n", style="dim white")
 
         # bottom border
-        text.append("└" + "─" * (dim*2) + "┘", style="dim white")
+        text.append("└" + "─" * (dim * 2) + "┘", style="dim white")
         return text
-
 
     def update_piece(self, piece):
         """Update the next piece"""
         self.next_piece = piece
         next_display = self.query_one("#next-piece-display", Static)
         next_display.update(self.render_next_piece())
+
 
 class ScoreWidget(Static):
     """Widget to display score and level"""
@@ -282,22 +281,17 @@ class ScoreWidget(Static):
         yield Label(f"LINES {self.lines}", id="lines-value", classes="section-title")
 
     def watch_score(self, score: int):
-        try:
+        with contextlib.suppress(NoMatches):
             self.query_one("#score-value", Label).update(f"SCORE {score}")
-        except NoMatches:
-            pass
 
     def watch_level(self, level: int):
-        try:
+        with contextlib.suppress(NoMatches):
             self.query_one("#level-value", Label).update(f"LEVEL {level}")
-        except NoMatches:
-            pass
 
     def watch_lines(self, lines: int):
-        try:
+        with contextlib.suppress(NoMatches):
             self.query_one("#lines-value", Label).update(f"LINES {lines}")
-        except NoMatches:
-            pass
+
 
 class TetrisApp(App):
     """Main Tetris application"""
@@ -404,7 +398,7 @@ class TetrisApp(App):
     }
     """
 
-    BINDINGS = [
+    BINDINGS = (
         ("left,a", "move_left", "Move Left"),
         ("right,d", "move_right", "Move Right"),
         ("down,s", "move_down", "Move Down"),
@@ -417,7 +411,7 @@ class TetrisApp(App):
 
     def compose(self) -> ComposeResult:
         with Container(id="game-container"):
-            yield Label("🎮 TEXTRIS 🕹", id="title")
+            yield Label("🎮 TETRIS 🕹", id="title")
             with Horizontal():
                 with Container(id="board-container"):
                     yield TetrisBoard(id="board")
@@ -566,6 +560,11 @@ class TetrisApp(App):
         # Relaunch the current Python process with same args for a clean state.
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-if __name__ == "__main__":
+
+def main():
     app = TetrisApp()
     app.run()
+
+
+if __name__ == "__main__":
+    main()
