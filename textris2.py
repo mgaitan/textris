@@ -361,7 +361,6 @@ class TetrisApp(App):
 
     #game-over-overlay {
         layer: overlay;
-        dock: fill;
         content-align: center middle;
         text-style: bold;
         color: $error;
