@@ -227,25 +227,30 @@ class NextPieceWidget(Static):
         bottom_pad = dim - shape_h - top_pad
 
         # helper for an empty row
-        empty = "│" + "  " * dim + "│\n"
         for _ in range(top_pad):
-            text.append(empty)
+            text.append("│", style="dim white")
+            text.append("  " * dim)
+            text.append("│\n", style="dim white")
 
         # each shape row, centered horizontally
         for row in shape_matrix:
             # left padding
             left   = (dim - len(row)) // 2
             right  = dim - len(row) - left
-            text.append("│" + "  " * left)
+            text.append("│", style="dim white")
+            text.append("  " * left)
             for cell in row:
                 if cell:
                     text.append("██", style=f"bold {color}")
                 else:
                     text.append("  ")
-            text.append("  " * right + "│\n", style="dim white")
+            text.append("  " * right)
+            text.append("│\n", style="dim white")
 
         for _ in range(bottom_pad):
-            text.append(empty)
+            text.append("│", style="dim white")
+            text.append("  " * dim)
+            text.append("│\n", style="dim white")
 
         # bottom border
         text.append("└" + "─" * (dim*2) + "┘", style="dim white")
