@@ -124,11 +124,9 @@ class TetrisBoard(Static):
 
     def update_display(self):
         """Update the board display"""
-        try:
-            board_display = self.query_one("#board-display", Static)
-            board_display.update(self.render_board())
-        except:
-            pass  # Widget not ready yet
+        board_display = self.query_one("#board-display", Static)
+        board_display.update(self.render_board())
+
 
     def move_piece(self, dx, dy):
         """Move the current piece"""
