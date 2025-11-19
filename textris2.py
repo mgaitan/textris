@@ -166,9 +166,22 @@ class TetrisBoard(Static):
                 0 <= board_y < self.board_height):
                 self.board[board_y][board_x] = self.current_piece.color
 
+        # Clear any completed lines
+        self._clear_full_lines()
+
         # Spawn a new piece
         self.current_piece = TetrisPiece()
         self.update_display()
+
+    def _clear_full_lines(self):
+        """Remove filled rows and collapse the board."""
+        new_rows = [row for row in self.board if not all(row)]
+        cleared = self.board_height - len(new_rows)
+        if cleared:
+            # Add empty rows at the top
+            self.board = [[0 for _ in range(self.board_width)] for _ in range(cleared)] + new_rows
+        else:
+            self.board = new_rows
 
     def rotate_piece(self):
         """Rotate the current piece"""
