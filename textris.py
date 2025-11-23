@@ -9,6 +9,7 @@ import contextlib
 import os
 import random
 import sys
+from collections import deque
 
 from rich.text import Text
 from textual.app import App, ComposeResult
@@ -58,14 +59,14 @@ class TetrisPiece:
 
         self.type = piece_type
         self.color = PIECES[piece_type]["color"]
-        self.codes = PIECES[piece_type]["codes"]
-        self.rotation = 0
+        self.codes = deque(PIECES[piece_type]["codes"])
+        self.code = self.codes[0]
         self.x = 4  # Start at center of board
         self.y = 0
 
     @property
     def shape(self):
-        return hex_code_to_coords(self.codes[self.rotation % len(self.codes)])
+        return hex_code_to_coords(self.code)
 
     @property
     def blocks(self):
@@ -73,7 +74,12 @@ class TetrisPiece:
         return [(self.x + px, self.y + py) for px, py in self.shape]
 
     def rotate(self):
-        self.rotation = (self.rotation + 1) % len(self.codes)
+        self.codes.rotate(-1)
+        self.code = self.codes[0]
+
+    def undo_rotate(self):
+        self.codes.rotate(1)
+        self.code = self.codes[0]
 
 
 class TetrisBoard(Static):
@@ -189,13 +195,11 @@ class TetrisBoard(Static):
 
     def rotate_piece(self):
         """Rotate the current piece"""
-        old_rotation = self.current_piece.rotation
         self.current_piece.rotate()
 
         # Check if rotation causes collision
         if self.check_collision():
-            # Revert rotation
-            self.current_piece.rotation = old_rotation
+            self.current_piece.undo_rotate()
             return False
 
         self.update_display()
