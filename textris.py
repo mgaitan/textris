@@ -22,6 +22,7 @@ PIECES = {
     "S": {"color": "green", "codes": ["1254", "a651", "8956", "0459"]},
 }
 
+
 def coords_to_matrix(coords):
     """Turn a list of (x, y) coords into a minimal 2D matrix (for previews)."""
     width = max(x for x, _ in coords) + 1
@@ -45,7 +46,7 @@ class TetrisPiece:
 
     @property
     def shape(self) -> list(tuple[int, int]):
-        """expand the Hex code into a list of (x, y) coords relative to a 4x4 grid """
+        """expand the Hex code into a list of (x, y) coords relative to a 4x4 grid"""
         coords = []
         for char in self.code:
             value = int(char, 16)
@@ -564,6 +565,7 @@ class TetrisApp(App):
         # ref: https://textual.textualize.io/guide/actions/#dynamic-actions
         if not (self.game_over and action in self.LIVE_ACTIONS):
             return True
+
 
 def main():
     app = TetrisApp()
