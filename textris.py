@@ -76,7 +76,7 @@ class TetrisBoard(Static):
         self.board_width = width
         self.board_height = height
         self.board = [[0 for _ in range(width)] for _ in range(height)]
-        self.current_piece = TetrisPiece()
+        self.current_piece: TetrisPiece | None = None
 
     def compose(self) -> ComposeResult:
         yield Static(self.render_board(), id="board-display")
@@ -123,6 +123,8 @@ class TetrisBoard(Static):
 
     def move_piece(self, dx, dy):
         """Move the current piece"""
+        if not self.current_piece:
+            return False
         old_x, old_y = self.current_piece.x, self.current_piece.y
         self.current_piece.x += dx
         self.current_piece.y += dy
@@ -141,6 +143,8 @@ class TetrisBoard(Static):
 
     def check_collision(self):
         """Check if current piece collides with boundaries or other pieces"""
+        if not self.current_piece:
+            return False
         for board_x, board_y in self.current_piece.blocks:
             # Check boundaries
             if board_x < 0 or board_x >= self.board_width or board_y >= self.board_height:
@@ -154,6 +158,8 @@ class TetrisBoard(Static):
 
     def lock_piece(self):
         """Fix the current piece to the board and spawn a new one."""
+        if not self.current_piece:
+            return
         for board_x, board_y in self.current_piece.blocks:
             if 0 <= board_x < self.board_width and 0 <= board_y < self.board_height:
                 self.board[board_y][board_x] = self.current_piece.color
@@ -181,6 +187,8 @@ class TetrisBoard(Static):
 
     def rotate_piece(self):
         """Rotate the current piece"""
+        if not self.current_piece:
+            return False
         self.current_piece.rotate()
 
         # Check if rotation causes collision
